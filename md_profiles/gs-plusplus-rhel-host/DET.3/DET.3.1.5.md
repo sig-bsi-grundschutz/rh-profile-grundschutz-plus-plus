@@ -1,7 +1,7 @@
 ---
 x-trestle-global:
   profile:
-    title: Red Hat Enterprise Linux 9 — Grundschutz++ (Host-Umfang, kuratiert)
+    title: Grundschutz++ für Red Hat Enterprise Linux Host
 ---
 
 # DET.3.1.5 - \[Protokollierung\] Störungen der Netzerreichbarkeit

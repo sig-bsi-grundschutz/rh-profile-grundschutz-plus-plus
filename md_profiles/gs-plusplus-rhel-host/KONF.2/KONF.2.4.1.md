@@ -1,7 +1,7 @@
 ---
 x-trestle-global:
   profile:
-    title: Red Hat Enterprise Linux 9 — Grundschutz++ (Host-Umfang, kuratiert)
+    title: Grundschutz++ für Red Hat Enterprise Linux Host
 ---
 
 # KONF.2.4.1 - \[Konfiguration von Systemen\] Nicht benötigte Zertifikate

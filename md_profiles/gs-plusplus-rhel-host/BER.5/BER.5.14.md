@@ -1,7 +1,7 @@
 ---
 x-trestle-global:
   profile:
-    title: Red Hat Enterprise Linux 9 — Grundschutz++ (Host-Umfang, kuratiert)
+    title: Grundschutz++ für Red Hat Enterprise Linux Host
 ---
 
 # BER.5.14 - \[Umgang mit Authentisierungsmitteln\] Kompromittierte Authentifizierungsmittel

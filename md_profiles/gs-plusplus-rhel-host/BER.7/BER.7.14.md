@@ -33,7 +33,7 @@ x-trestle-set-params:
     profile-param-value-origin: <REPLACE_ME>
 x-trestle-global:
   profile:
-    title: Red Hat Enterprise Linux 9 — Grundschutz++ (Host-Umfang, kuratiert)
+    title: Grundschutz++ für Red Hat Enterprise Linux Host
 ---
 
 # BER.7.14 - \[Schlüsselmanagement\] Schlüssel vor Ablauf prüfen

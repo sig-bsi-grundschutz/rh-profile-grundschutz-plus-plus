@@ -1,7 +1,7 @@
 ---
 x-trestle-global:
   profile:
-    title: Red Hat Enterprise Linux 9 — Grundschutz++ (Host-Umfang, kuratiert)
+    title: Grundschutz++ für Red Hat Enterprise Linux Host
 ---
 
 # BER.5.5 - \[Umgang mit Authentisierungsmitteln\] Deaktivierung einfacher Biometrie auf IT-Systemen
