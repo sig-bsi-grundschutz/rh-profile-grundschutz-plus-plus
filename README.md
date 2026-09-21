@@ -6,6 +6,60 @@ Prerequisite: [profile template](https://github.com/IBM/compliance-trestle-templ
 
 - [view profile markdown](#view-profile-markdown)
 - [update profile](#update-profile)
+- [CI automation](#ci-automation)
+
+-----
+
+##### CI automation
+
+Scripts under `scripts/automation/` run from GitHub Actions on push. Shared helpers are reused; branch decides the entrypoint.
+
+```mermaid
+flowchart TB
+  subgraph develop["push → develop · dev-push.yml"]
+    direction TB
+    d_inst["install_trestle.sh"]
+    d_upd["check_and_update_all.sh"]
+    d_regen["regenerate_profiles.sh"]
+    d_asm["assemble_profiles.sh"]
+    d_push["push.sh"]
+    d_inst --> d_upd
+    d_upd -->|"profiles/**/*.json changed"| d_regen
+    d_upd -->|"md_profiles/**/*.md changed"| d_asm
+    d_upd --> d_push
+  end
+
+  subgraph main["push → main · main-push.yml"]
+    direction TB
+    m_inst["install_trestle.sh"]
+    m_rel["release.sh"]
+    m_psr["semantic-release version"]
+    m_regen["regenerate_profiles.sh<br/>if md_profiles empty"]
+    m_asm["assemble_profiles.sh"]
+    m_push["push.sh<br/>+ move v* tag when VERSION_TAG set"]
+    m_chk["check_profile.sh"]
+    m_down["update_downstream.sh<br/>PR → component-definition develop"]
+    m_merge["direct-merge-action<br/>main → develop"]
+    m_inst --> m_rel
+    m_rel --> m_psr
+    m_rel --> m_regen --> m_asm
+    m_rel --> m_asm
+    m_rel --> m_push
+    m_push --> m_chk
+    m_chk -->|"profile present"| m_down
+    m_push --> m_merge
+  end
+```
+
+| Script | develop | main |
+| --- | --- | --- |
+| `install_trestle.sh` | yes | yes |
+| `check_and_update_all.sh` | entry | — |
+| `release.sh` | — | entry |
+| `regenerate_profiles.sh` | if JSON changed | if `md_profiles` empty |
+| `assemble_profiles.sh` | if Markdown changed | always when content present |
+| `push.sh` | Autoupdate commit | Autoupdate + optional tag move |
+| `check_profile.sh` / `update_downstream.sh` | — | after release |
 
 -----
 
