@@ -28,12 +28,14 @@ else
      echo "Nothing to commit"
   else
      git commit --message "$COMMIT_TITLE"
-     remote=$URL_COMPONENT_DEFINITION
+     # Push via named remote origin (checkout already has GIT_TOKEN).
+     # Raw URL + --force-with-lease fails with (stale info) when the
+     # leftover profiles_autoupdate branch still exists on the remote.
      if gh pr list -H "$BRANCH" -B develop --state open --json number -q '.[0].number' | grep -q .; then
-       git push -u "$remote" "$BRANCH"
+       git push -u origin "$BRANCH"
        echo "Updated existing open PR on $BRANCH"
      else
-       git push -u --force-with-lease "$remote" "$BRANCH"
+       git push -u --force-with-lease origin "$BRANCH"
        echo "$COMMIT_BODY"
        gh pr create -t "$COMMIT_TITLE" -b "$COMMIT_BODY" -B "develop" -H "$BRANCH"
      fi
