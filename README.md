@@ -24,8 +24,8 @@ flowchart TB
     d_asm["assemble_profiles.sh"]
     d_push["push.sh"]
     d_inst --> d_upd
-    d_upd -->|"profiles/**/*.json changed"| d_regen
-    d_upd -->|"md_profiles/**/*.md changed"| d_asm
+    d_upd -->|"profiles/NAME/**/*.json"| d_regen
+    d_upd -->|"md_profiles/NAME/**/*.md"| d_asm
     d_upd --> d_push
   end
 
@@ -34,8 +34,8 @@ flowchart TB
     m_inst["install_trestle.sh"]
     m_rel["release.sh"]
     m_psr["semantic-release version"]
-    m_regen["regenerate_profiles.sh<br/>if md_profiles empty"]
-    m_asm["assemble_profiles.sh"]
+    m_regen["regenerate_profiles.sh<br/>per profile missing md"]
+    m_asm["assemble_profiles.sh<br/>all profiles"]
     m_push["push.sh<br/>+ move v* tag when VERSION_TAG set"]
     m_chk["check_profile.sh"]
     m_down["update_downstream.sh<br/>PR → component-definition develop"]
@@ -46,20 +46,23 @@ flowchart TB
     m_rel --> m_asm
     m_rel --> m_push
     m_push --> m_chk
-    m_chk -->|"profile present"| m_down
+    m_chk -->|"any profile present"| m_down
     m_push --> m_merge
   end
 ```
+
+Develop regen/assemble run **per changed profile name** (path under `profiles/<name>/` or `md_profiles/<name>/`). Main release regenerates any profile that has JSON but no markdown, then assembles **all** profiles with one shared semantic-release version (fail closed). Local check: `./scripts/automation/verify_multi_profile.sh` (uses `test-data/` fixture; not run in GHA).
 
 | Script | develop | main |
 | --- | --- | --- |
 | `install_trestle.sh` | yes | yes |
 | `check_and_update_all.sh` | entry | — |
 | `release.sh` | — | entry |
-| `regenerate_profiles.sh` | if JSON changed | if `md_profiles` empty |
-| `assemble_profiles.sh` | if Markdown changed | always when content present |
+| `regenerate_profiles.sh` | if that profile’s JSON changed | if that profile’s md missing |
+| `assemble_profiles.sh` | if that profile’s Markdown changed | all profiles when content present |
 | `push.sh` | Autoupdate commit | Autoupdate + optional tag move |
 | `check_profile.sh` / `update_downstream.sh` | — | after release |
+| `verify_multi_profile.sh` | local only | local only |
 
 -----
 

@@ -1,0 +1,28 @@
+{
+  "profile": {
+    "uuid": "59bdd2f2-ec70-402b-84cb-6fc6c9cd1650",
+    "metadata": {
+      "title": "CI fixture profile (throwaway — not a product profile)",
+      "last-modified": "2026-10-20T00:00:00.000+00:00",
+      "version": "0.0.0",
+      "oscal-version": "1.2.1",
+      "remarks": "Minimal profile for local multi-profile CI verification only. Do not promote to profiles/ on main."
+    },
+    "imports": [
+      {
+        "href": "trestle://catalogs/grundschutz-plus-plus/catalog.json",
+        "include-controls": [
+          {
+            "with-ids": [
+              "ARCH.5.2"
+            ]
+          }
+        ]
+      }
+    ],
+    "merge": {
+      "as-is": true
+    },
+    "modify": {}
+  }
+}
