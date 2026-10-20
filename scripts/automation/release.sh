@@ -1,37 +1,55 @@
 #!/bin/bash
 set -eo pipefail
 
-source config.env
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=profile_names.sh
+source "$SCRIPT_DIR/profile_names.sh"
+# shellcheck source=../../config.env
+source "$SCRIPT_DIR/../../config.env"
 
-COUNT_PROFILES=$(ls -1 profiles | wc -l)
-COUNT_PROFILE_MD=$(ls -1 md_profiles | wc -l)
-if [ "$COUNT_PROFILES" == "0" ] || [ "$COUNT_PROFILE_MD" == "0" ]
-then
-    echo "no profile or markdown present -> nothing to do"
+profile_names=()
+while IFS= read -r line; do
+	[ -n "$line" ] && profile_names+=("$line")
+done < <(list_profiles)
+
+if [ ${#profile_names[@]} -eq 0 ]; then
+	echo "no profile present -> nothing to do"
+	exit 0
+fi
+
+next_version=$(semantic-release version --print 2>/dev/null || true)
+last_version=$(semantic-release version --print-last-released 2>/dev/null || true)
+# Match v7: empty VERSION_TAG when nothing to release.
+# Untagged repos: PSR prints 0.0.0 with no bump commits — skip that stamp.
+if [ "$next_version" = "$last_version" ] || { [ -z "$last_version" ] && [ "$next_version" = "0.0.0" ]; }; then
+	version_tag=""
 else
-    next_version=$(semantic-release version --print 2>/dev/null || true)
-    last_version=$(semantic-release version --print-last-released 2>/dev/null || true)
-    # Match v7: empty VERSION_TAG when nothing to release.
-    # Untagged repos: PSR prints 0.0.0 with no bump commits — skip that stamp.
-    if [ "$next_version" = "$last_version" ] || { [ -z "$last_version" ] && [ "$next_version" = "0.0.0" ]; }; then
-        version_tag=""
-    else
-        version_tag="$next_version"
-    fi
-	echo "Bumping version of profiles to ${version_tag}" 
-	export VERSION_TAG="$version_tag"
-	echo "VERSION_TAG=${VERSION_TAG}" >> $GITHUB_ENV
-	# There is no md but json has at least one control
-	COUNT=$(ls -1 md_profiles | wc -l)
-	if [ $COUNT -lt 1 ]
-	then
-		./scripts/automation/regenerate_profiles.sh 
+	version_tag="$next_version"
+fi
+echo "Bumping version of profiles to ${version_tag}"
+export VERSION_TAG="$version_tag"
+if [ -n "${GITHUB_ENV:-}" ]; then
+	echo "VERSION_TAG=${VERSION_TAG}" >> "$GITHUB_ENV"
+fi
+
+# Per-profile: regenerate any profile that has JSON but no md_profiles/<name>/
+missing_md=()
+for name in "${profile_names[@]}"; do
+	if ! has_md_profile "$name"; then
+		missing_md+=("$name")
 	fi
-	./scripts/automation/assemble_profiles.sh $version_tag
-	git config --global user.email "$EMAIL"
-	git config --global user.name "$NAME"
-	# --no-push/--no-vcs-release: push.sh commits profile updates and moves the tag.
-	if [ -n "$version_tag" ]; then
-		semantic-release version --no-push --no-vcs-release
-	fi
+done
+if [ ${#missing_md[@]} -gt 0 ]; then
+	echo "Regenerating profiles missing markdown: ${missing_md[*]}"
+	"$SCRIPT_DIR/regenerate_profiles.sh" "${missing_md[@]}"
+fi
+
+# Assemble all profiles (fail closed on any error)
+"$SCRIPT_DIR/assemble_profiles.sh"
+
+git config --global user.email "$EMAIL"
+git config --global user.name "$NAME"
+# --no-push/--no-vcs-release: push.sh commits profile updates and moves the tag.
+if [ -n "$version_tag" ]; then
+	semantic-release version --no-push --no-vcs-release
 fi

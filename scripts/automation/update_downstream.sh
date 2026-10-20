@@ -4,7 +4,7 @@ set -eo pipefail
 source config.env
 
 export COMMIT_TITLE="chore: Profiles automatic update."
-export COMMIT_BODY="Sync profiles with $PROFILE repo"
+export COMMIT_BODY="Sync profiles from $REPO_PROFILE"
 BRANCH="profiles_autoupdate"
 
 git config --global user.email "$EMAIL"

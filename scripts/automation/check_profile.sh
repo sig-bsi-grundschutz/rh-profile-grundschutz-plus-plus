@@ -1,13 +1,18 @@
 #!/bin/bash
 
-source config.env
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=profile_names.sh
+source "$SCRIPT_DIR/profile_names.sh"
 
-RESULT=$(ls profiles)
+profile_names=()
+while IFS= read -r line; do
+	[ -n "$line" ] && profile_names+=("$line")
+done < <(list_profiles)
 
-if [[ "$RESULT" == *"$PROFILE"* ]]; then
-  echo "profile exists, exit 1";
-  exit 1;
+if [ ${#profile_names[@]} -gt 0 ]; then
+	echo "profile(s) exist (${profile_names[*]}), exit 1"
+	exit 1
 else
-  echo "profile does not exist, exit 0"
-  exit 0;
+	echo "no profile present, exit 0"
+	exit 0
 fi

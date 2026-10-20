@@ -85,8 +85,12 @@ function err() {
     msg "$*" 1>&2
 }
 
-COUNT_PROFILES=$(ls -1 profiles | wc -l)
-COUNT_PROFILE_MD=$(ls -1 md_profiles | wc -l)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=profile_names.sh
+source "$SCRIPT_DIR/profile_names.sh"
+
+COUNT_PROFILES=$(list_profiles | wc -l | tr -d ' ')
+COUNT_PROFILE_MD=$(list_md_profiles | wc -l | tr -d ' ')
 if [ "$COUNT_PROFILES" == "0" ] || [ "$COUNT_PROFILE_MD" == "0" ]
 then
     echo "no profile or markdown present -> nothing to do"
